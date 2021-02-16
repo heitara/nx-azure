@@ -1,15 +1,18 @@
-import { exec, ExecFileSyncOptions, execSync } from "child_process";
-import { accessSync } from "fs";
+import { ExecFileSyncOptions, execSync } from "child_process";
+import * as fs from "fs";
+import { accessSync, chmod } from "fs";
 import fetch from "node-fetch";
 import * as os from "os";
 import * as path from "path";
+import * as unzipper from "unzipper";
 import { SupportedArchAndPlatform } from "./azcopy.types";
 import {
   ensureBinFolder,
   shellEscape,
   wrapSpinner,
-  writeDownload,
+  writeDownload
 } from "./helpers";
+
 
 const argsToFilter = ["--force-bin-download"];
 
@@ -23,6 +26,11 @@ export async function azcopy(force: boolean = forceBinDownload) {
   const binPath = path.resolve(
     __dirname,
     platform === "win32" ? "./scripts/bin/azcopy.exe" : "./scripts/bin/azcopy"
+  );
+
+  const azcopyFilename = platform === "win32" ? "azcopy.exe" : "azcopy"
+  const binFolder = path.resolve(
+    __dirname, "./scripts/bin"
   );
 
   try {
@@ -72,21 +80,30 @@ export async function azcopy(force: boolean = forceBinDownload) {
         "Extracting...",
         () =>
           new Promise((resolve, reject) => {
-            exec(
-              `powershell -ExecutionPolicy RemoteSigned -File ${scriptFile}`,
-              {
-                ...commonExecOptions,
-                windowsHide: true,
-              },
-              (error) => {
-                if (error) {
-                  reject("Error extracting azcopy files");
-                  console.error(error);
-                }
-
-                resolve();
+            let azcopyBinFile = path.resolve(__dirname, './scripts/bin/', azcopyFilename)
+            let zipPath = path.resolve(__dirname, downloadedFileRelativePath)
+            fs.createReadStream(zipPath)
+            .pipe(unzipper.Parse())
+            .on('entry', function (entry) {
+              const fileName = entry.path;
+              const type = entry.type; // 'Directory' or 'File'
+              const size = entry.vars.uncompressedSize; // There is also compressedSize;
+              if (fileName.endsWith(azcopyFilename)) {
+                entry.pipe(fs.createWriteStream(azcopyBinFile));
+              } else {
+                entry.autodrain();
               }
-            );
+            })
+            .promise()
+            .then( () => {
+              fs.unlinkSync(zipPath);
+              chmod(azcopyBinFile, 0o100, (err) => {
+                resolve();
+              });
+            }, e => {
+              console.log('error', e)
+              reject(e)
+            });
           })
       );
     } else if (platform === "linux" || platform === "darwin") {
@@ -109,13 +126,29 @@ export async function azcopy(force: boolean = forceBinDownload) {
         "Extracting...",
         () =>
           new Promise((resolve, reject) => {
-            exec(`./${scriptFile}`, commonExecOptions, (error) => {
-              if (error) {
-                reject("Error extracting azcopy files");
-                console.error(error);
+            let azcopyBinFile = path.resolve(__dirname, './scripts/bin/', azcopyFilename)
+            let zipPath = path.resolve(__dirname, downloadedFileRelativePath)
+            fs.createReadStream(zipPath)
+            .pipe(unzipper.Parse())
+            .on('entry', function (entry) {
+              const fileName = entry.path;
+              const type = entry.type; // 'Directory' or 'File'
+              const size = entry.vars.uncompressedSize; // There is also compressedSize;
+              if (fileName.endsWith(azcopyFilename)) {
+                entry.pipe(fs.createWriteStream(azcopyBinFile));
+              } else {
+                entry.autodrain();
               }
-
-              resolve();
+            })
+            .promise()
+            .then( () => {
+              fs.unlinkSync(zipPath);
+              chmod(azcopyBinFile, 0o100, (err) => {
+                resolve();
+              });
+            }, e => {
+              console.log('error', e)
+              reject(e)
             });
           })
       );
