@@ -1,0 +1,24 @@
+{
+  "name": "@nx-azure/azcopy",
+  "version": "0.0.13",
+  "description": "A nodejs passthrough for `azcopy` commandline tool described at https://aka.ms/azcopy",
+  "main": "src/index.js",
+  "types": "index.d.ts",
+  "typings": "src/index.d.ts",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/nx-azure"
+  },
+  "homepage": "https://github.com/microsoft/nx-azure",
+  "bin": {
+    "nx-azure-azcopy": "./src/index.js"
+  },
+  "dependencies": {
+    "node-fetch": "^2.6.1",
+    "tslib": "^2.0.1",
+    "ora": "^5.0.0",
+    "unzipper": "^0.10.11"
+  },
+  "peerDependencies": {}
+}

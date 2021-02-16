@@ -1,0 +1,1 @@
+{"version":3,"file":"azcopy.types.js","sourceRoot":"","sources":["../../../../../packages/azcopy/src/lib/azcopy.types.ts"],"names":[],"mappings":";;;AAAa,QAAA,sBAAsB,GAAG,CAAC,KAAK,EAAE,KAAK,CAAC,CAAC;AAExC,QAAA,kBAAkB,GAAsB;IACnD,QAAQ;IACR,OAAO;IACP,OAAO;CACR,CAAC;AAEW,QAAA,wBAAwB,GAAG;IACtC,WAAW;IACX,WAAW;IACX,WAAW;IACX,WAAW;IACX,YAAY;IACZ,YAAY;CACb,CAAC"}
