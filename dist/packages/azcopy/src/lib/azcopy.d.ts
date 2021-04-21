@@ -1,1 +1,1 @@
-export declare function azcopy(force?: boolean): Promise<void>;
+export declare function azcopy(force?: boolean, extraArguments?: string[]): Promise<void>;

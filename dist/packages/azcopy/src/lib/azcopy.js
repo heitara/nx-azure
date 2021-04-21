@@ -15,7 +15,7 @@ const argsToFilter = ["--force-bin-download"];
 const platform = os.platform();
 const arch = os.arch();
 const forceBinDownload = process.argv.includes("--force-bin-download");
-function azcopy(force = forceBinDownload) {
+function azcopy(force = forceBinDownload, extraArguments = []) {
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
         console.log(`Detected ${platform} platform (arch - ${arch})`);
         const binPath = path.resolve(__dirname, platform === "win32" ? "./scripts/bin/azcopy.exe" : "./scripts/bin/azcopy");
@@ -37,7 +37,7 @@ function azcopy(force = forceBinDownload) {
         const commonExecOptions = {
             encoding: "utf8",
             stdio: "inherit",
-            cwd: path.resolve(__dirname, "./scripts"),
+            cwd: path.resolve(__dirname, "./scripts")
         };
         let downloadLink;
         let downloadedFileRelativePath;
@@ -57,11 +57,11 @@ function azcopy(force = forceBinDownload) {
                     yield node_fetch_1.default(downloadLink).then(helpers_1.writeDownload(downloadedFileRelativePath));
                 }));
                 yield helpers_1.wrapSpinner("Extracting...", () => new Promise((resolve, reject) => {
-                    let azcopyBinFile = path.resolve(__dirname, './scripts/bin/', azcopyFilename);
-                    let zipPath = path.resolve(__dirname, downloadedFileRelativePath);
+                    const azcopyBinFile = path.resolve(__dirname, "./scripts/bin/", azcopyFilename);
+                    const zipPath = path.resolve(__dirname, downloadedFileRelativePath);
                     fs.createReadStream(zipPath)
                         .pipe(unzipper.Parse())
-                        .on('entry', function (entry) {
+                        .on("entry", function (entry) {
                         const fileName = entry.path;
                         const type = entry.type; // 'Directory' or 'File'
                         const size = entry.vars.uncompressedSize; // There is also compressedSize;
@@ -78,8 +78,8 @@ function azcopy(force = forceBinDownload) {
                         fs_1.chmod(azcopyBinFile, 0o100, (err) => {
                             resolve();
                         });
-                    }, e => {
-                        console.log('error', e);
+                    }, (e) => {
+                        console.log("error", e);
                         reject(e);
                     });
                 }));
@@ -98,11 +98,11 @@ function azcopy(force = forceBinDownload) {
                     yield node_fetch_1.default(downloadLink).then(helpers_1.writeDownload(downloadedFileRelativePath));
                 }));
                 yield helpers_1.wrapSpinner("Extracting...", () => new Promise((resolve, reject) => {
-                    let azcopyBinFile = path.resolve(__dirname, './scripts/bin/', azcopyFilename);
-                    let zipPath = path.resolve(__dirname, downloadedFileRelativePath);
+                    const azcopyBinFile = path.resolve(__dirname, "./scripts/bin/", azcopyFilename);
+                    const zipPath = path.resolve(__dirname, downloadedFileRelativePath);
                     fs.createReadStream(zipPath)
                         .pipe(unzipper.Parse())
-                        .on('entry', function (entry) {
+                        .on("entry", function (entry) {
                         const fileName = entry.path;
                         const type = entry.type; // 'Directory' or 'File'
                         const size = entry.vars.uncompressedSize; // There is also compressedSize;
@@ -119,8 +119,8 @@ function azcopy(force = forceBinDownload) {
                         fs_1.chmod(azcopyBinFile, 0o100, (err) => {
                             resolve();
                         });
-                    }, e => {
-                        console.log('error', e);
+                    }, (e) => {
+                        console.log("error", e);
                         reject(e);
                     });
                 }));
@@ -129,7 +129,8 @@ function azcopy(force = forceBinDownload) {
         const args = process.argv.slice(2, process.argv.length).filter((arg) => {
             return !argsToFilter.includes(arg);
         });
-        const escapedCommand = helpers_1.shellEscape(args);
+        const allArguments = args.concat(extraArguments);
+        const escapedCommand = helpers_1.shellEscape(allArguments);
         console.log("------ executing azcopy ------ \n");
         child_process_1.execSync(`${binPath} ${escapedCommand}`, commonExecOptions);
     });

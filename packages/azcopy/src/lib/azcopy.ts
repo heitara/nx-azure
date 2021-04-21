@@ -13,14 +13,16 @@ import {
   writeDownload
 } from "./helpers";
 
-
 const argsToFilter = ["--force-bin-download"];
 
 const platform = os.platform();
 const arch = os.arch();
 const forceBinDownload = process.argv.includes("--force-bin-download");
 
-export async function azcopy(force: boolean = forceBinDownload) {
+export async function azcopy(
+  force: boolean = forceBinDownload,
+  extraArguments: string[] = []
+) {
   console.log(`Detected ${platform} platform (arch - ${arch})`);
 
   const binPath = path.resolve(
@@ -28,10 +30,8 @@ export async function azcopy(force: boolean = forceBinDownload) {
     platform === "win32" ? "./scripts/bin/azcopy.exe" : "./scripts/bin/azcopy"
   );
 
-  const azcopyFilename = platform === "win32" ? "azcopy.exe" : "azcopy"
-  const binFolder = path.resolve(
-    __dirname, "./scripts/bin"
-  );
+  const azcopyFilename = platform === "win32" ? "azcopy.exe" : "azcopy";
+  const binFolder = path.resolve(__dirname, "./scripts/bin");
 
   try {
     accessSync(binPath);
@@ -52,7 +52,7 @@ export async function azcopy(force: boolean = forceBinDownload) {
   const commonExecOptions: ExecFileSyncOptions = {
     encoding: "utf8",
     stdio: "inherit",
-    cwd: path.resolve(__dirname, "./scripts"),
+    cwd: path.resolve(__dirname, "./scripts")
   };
 
   let downloadLink: string;
@@ -80,30 +80,37 @@ export async function azcopy(force: boolean = forceBinDownload) {
         "Extracting...",
         () =>
           new Promise((resolve, reject) => {
-            let azcopyBinFile = path.resolve(__dirname, './scripts/bin/', azcopyFilename)
-            let zipPath = path.resolve(__dirname, downloadedFileRelativePath)
+            const azcopyBinFile = path.resolve(
+              __dirname,
+              "./scripts/bin/",
+              azcopyFilename
+            );
+            const zipPath = path.resolve(__dirname, downloadedFileRelativePath);
             fs.createReadStream(zipPath)
-            .pipe(unzipper.Parse())
-            .on('entry', function (entry) {
-              const fileName = entry.path;
-              const type = entry.type; // 'Directory' or 'File'
-              const size = entry.vars.uncompressedSize; // There is also compressedSize;
-              if (fileName.endsWith(azcopyFilename)) {
-                entry.pipe(fs.createWriteStream(azcopyBinFile));
-              } else {
-                entry.autodrain();
-              }
-            })
-            .promise()
-            .then( () => {
-              fs.unlinkSync(zipPath);
-              chmod(azcopyBinFile, 0o100, (err) => {
-                resolve();
-              });
-            }, e => {
-              console.log('error', e)
-              reject(e)
-            });
+              .pipe(unzipper.Parse())
+              .on("entry", function (entry) {
+                const fileName = entry.path;
+                const type = entry.type; // 'Directory' or 'File'
+                const size = entry.vars.uncompressedSize; // There is also compressedSize;
+                if (fileName.endsWith(azcopyFilename)) {
+                  entry.pipe(fs.createWriteStream(azcopyBinFile));
+                } else {
+                  entry.autodrain();
+                }
+              })
+              .promise()
+              .then(
+                () => {
+                  fs.unlinkSync(zipPath);
+                  chmod(azcopyBinFile, 0o100, (err) => {
+                    resolve();
+                  });
+                },
+                (e) => {
+                  console.log("error", e);
+                  reject(e);
+                }
+              );
           })
       );
     } else if (platform === "linux" || platform === "darwin") {
@@ -126,30 +133,37 @@ export async function azcopy(force: boolean = forceBinDownload) {
         "Extracting...",
         () =>
           new Promise((resolve, reject) => {
-            let azcopyBinFile = path.resolve(__dirname, './scripts/bin/', azcopyFilename)
-            let zipPath = path.resolve(__dirname, downloadedFileRelativePath)
+            const azcopyBinFile = path.resolve(
+              __dirname,
+              "./scripts/bin/",
+              azcopyFilename
+            );
+            const zipPath = path.resolve(__dirname, downloadedFileRelativePath);
             fs.createReadStream(zipPath)
-            .pipe(unzipper.Parse())
-            .on('entry', function (entry) {
-              const fileName = entry.path;
-              const type = entry.type; // 'Directory' or 'File'
-              const size = entry.vars.uncompressedSize; // There is also compressedSize;
-              if (fileName.endsWith(azcopyFilename)) {
-                entry.pipe(fs.createWriteStream(azcopyBinFile));
-              } else {
-                entry.autodrain();
-              }
-            })
-            .promise()
-            .then( () => {
-              fs.unlinkSync(zipPath);
-              chmod(azcopyBinFile, 0o100, (err) => {
-                resolve();
-              });
-            }, e => {
-              console.log('error', e)
-              reject(e)
-            });
+              .pipe(unzipper.Parse())
+              .on("entry", function (entry) {
+                const fileName = entry.path;
+                const type = entry.type; // 'Directory' or 'File'
+                const size = entry.vars.uncompressedSize; // There is also compressedSize;
+                if (fileName.endsWith(azcopyFilename)) {
+                  entry.pipe(fs.createWriteStream(azcopyBinFile));
+                } else {
+                  entry.autodrain();
+                }
+              })
+              .promise()
+              .then(
+                () => {
+                  fs.unlinkSync(zipPath);
+                  chmod(azcopyBinFile, 0o100, (err) => {
+                    resolve();
+                  });
+                },
+                (e) => {
+                  console.log("error", e);
+                  reject(e);
+                }
+              );
           })
       );
     }
@@ -159,7 +173,9 @@ export async function azcopy(force: boolean = forceBinDownload) {
     return !argsToFilter.includes(arg);
   });
 
-  const escapedCommand = shellEscape(args);
+  const allArguments = args.concat(extraArguments);
+
+  const escapedCommand = shellEscape(allArguments);
   console.log("------ executing azcopy ------ \n");
   execSync(`${binPath} ${escapedCommand}`, commonExecOptions);
 }
