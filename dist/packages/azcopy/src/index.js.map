@@ -1,1 +1,1 @@
-{"version":3,"file":"index.js","sourceRoot":"","sources":["../../../../packages/azcopy/src/index.ts"],"names":[],"mappings":";;;;AACA,yCAAsC;AAEtC,eAAM,EAAE,CAAC;AAET,uCAAsC;AAA7B,gGAAA,MAAM,OAAA;AACf,kBAAe,eAAM,CAAC"}
+{"version":3,"file":"index.js","sourceRoot":"","sources":["../../../../packages/azcopy/src/index.ts"],"names":[],"mappings":";;;;AACA,yCAAsC;AAEtC,YAAY;AAEZ,uCAAsC;AAA7B,gGAAA,MAAM,OAAA;AACf,kBAAe,eAAM,CAAC"}

@@ -35,11 +35,9 @@ export async function azcopy(
 
   try {
     accessSync(binPath);
-    console.log("binary exists");
   } catch (error) {
     force = true;
     await ensureBinFolder();
-    console.log("binary not found");
   }
 
   if (!SupportedArchAndPlatform.includes(`${platform}_${arch}`)) {
@@ -177,5 +175,6 @@ export async function azcopy(
 
   const escapedCommand = shellEscape(allArguments);
   console.log("------ executing azcopy ------ \n");
+  console.log(`------ Escaped Command: ${escapedCommand} ------ \n`);
   execSync(`${binPath} ${escapedCommand}`, commonExecOptions);
 }

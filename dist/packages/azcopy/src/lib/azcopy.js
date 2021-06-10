@@ -23,12 +23,10 @@ function azcopy(force = forceBinDownload, extraArguments = []) {
         const binFolder = path.resolve(__dirname, "./scripts/bin");
         try {
             fs_1.accessSync(binPath);
-            console.log("binary exists");
         }
         catch (error) {
             force = true;
             yield helpers_1.ensureBinFolder();
-            console.log("binary not found");
         }
         if (!azcopy_types_1.SupportedArchAndPlatform.includes(`${platform}_${arch}`)) {
             throw Error("Unsupported platform for azcopy - supported platform and arch are - " +
@@ -132,6 +130,7 @@ function azcopy(force = forceBinDownload, extraArguments = []) {
         const allArguments = args.concat(extraArguments);
         const escapedCommand = helpers_1.shellEscape(allArguments);
         console.log("------ executing azcopy ------ \n");
+        console.log(`------ Escaped Command: ${escapedCommand} ------ \n`);
         child_process_1.execSync(`${binPath} ${escapedCommand}`, commonExecOptions);
     });
 }
